@@ -86,6 +86,24 @@ export const authService = {
   },
 
   /**
+   * 🆕 Generates authentic token vectors specifically for verified Google Sign-ins.
+   * මේකෙන් Google හරහා සාර්ථකව ආපු User කෙනෙකුට Password Check කිරීමකින් තොරව JWT ලබා දේ.
+   */
+  loginGoogleUserService: async (userEntity: any) => {
+    return {
+      accessToken: signAccessToken(userEntity),
+      refreshToken: signRefreshToken(userEntity),
+      user: {
+        id: userEntity._id,
+        name: userEntity.name,
+        email: userEntity.email,
+        roles: userEntity.roles,
+        approved: userEntity.approved,
+      },
+    };
+  },
+
+  /**
    * Reissues access tokens via validation of an authentic refresh token.
    */
   refreshAccessTokenService: async (token: string) => {

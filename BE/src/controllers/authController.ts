@@ -3,6 +3,11 @@ import { authService } from "../services/authService";
 import { AuthenticatedRequest } from "../middleware/authMiddleware";
 import { User } from "../models/userModel";
 import { Student } from "../models/studentModel"; 
+// 🆕 Google Auth Library එක Import කිරීම
+import { OAuth2Client } from "google-auth-library";
+
+// 🆕 Google Client එක සක්‍රීය කිරීම
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const registerStudent = async (req: Request, res: Response) => {
   try {
@@ -42,6 +47,58 @@ export const loginUser = async (req: Request, res: Response) => {
       return res.status(401).json({ message: err.message });
     }
     res.status(500).json({ message: "Failed to login", error: err.message });
+  }
+};
+
+// 🆕 3. Google Login / Check සඳහා වන අලුත් Controller එක
+export const googleCheck = async (req: Request, res: Response) => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({ message: "Google token is required!" });
+    }
+
+    // Google හරහා ආපු Token එක සැබෑ එකක්ද කියා Verify කිරීම
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email) {
+      return res.status(400).json({ message: "Invalid Google token payload!" });
+    }
+
+    const email = payload.email;
+    const name = payload.name || "";
+
+    // 1. මේ Email එකෙන් User කෙනෙක් දැනටමත් DB එකේ ඉන්නවද බැලීම
+    const user = await User.findOne({ email });
+
+    if (user) {
+      // 🟢 2. User දැනටමත් ඉන්නවා නම් -> අලුත් සර්විස් මෙතඩ් එක මඟින් JWT Tokens සාදා සන්නිවේදනය කිරීම
+      const tokenData = await authService.loginGoogleUserService(user);
+
+      return res.status(200).json({
+        status: "SUCCESS",
+        message: "Login successful via Google..!",
+        ...tokenData
+      });
+      
+    } else {
+      // 🟡 3. User DB එකේ නැත්නම් -> "NOT_FOUND" කියා නම සහ ඊමේල් එක Frontend එකට දීම (Register Form එකට යවන්න)
+      return res.status(200).json({
+        status: "NOT_FOUND",
+        message: "User not registered in database",
+        email: email,
+        name: name,
+      });
+    }
+
+  } catch (err: any) {
+    console.error("Google Check Error:", err);
+    res.status(500).json({ message: "Google authentication failed", error: err.message });
   }
 };
 
