@@ -19,7 +19,7 @@ export const connectDB = async (): Promise<void> => {
         
         console.log(`🍃 MongoDB Connected Successfully: ${conn.connection.host}`);
     } catch (error: any) {
-        console.error(`❌ Database Connection Error: ${error.message}`);
+        console.error(` Database Connection Error: ${error.message}`);
         // Exit process with failure code if connection fails
         process.exit(1);
     }

@@ -34,7 +34,7 @@ export default function StudentDashboard() {
     window.location.href = "/login";
   };
 
-  // Variables අලුතෙන් නොදා දැනට තියෙන URL එකෙන් Active Page එක හොයාගන්නා ක්‍රමය
+  
   const currentPath = window.location.pathname;
 
   return (

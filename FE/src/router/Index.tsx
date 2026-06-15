@@ -49,12 +49,12 @@ const RequireAuth = ({ children, roles }: RequireAuthTypes) => {
 const DashboardWrapper = () => {
   const { user } = useAuth();
 
-  // Admin නම් Admin Dashboard එක පෙන්වන්න
+  
   if (user?.roles?.includes("ADMIN")) {
     return <AdminDashboard />;
   }
   
-  // Student නම් Nested Routes වැඩ කරන්න StudentDashboard Layout එක දෙන්න
+  
   if (user?.roles?.includes("STUDENT")) {
     return <StudentDashboard />;
   }
@@ -62,7 +62,7 @@ const DashboardWrapper = () => {
   return <Navigate to="/home" replace />;
 };
 
-// 💡 Sub-pages වලට AI Panel Context එක Pass කරන Helper Component එක
+
 function ContextConsumer({ Component }: { Component: React.ComponentType<any> }) {
   const context = useOutletContext<{ setAiPanelOpen: (open: boolean) => void }>();
   return <Component setAiPanelOpen={context?.setAiPanelOpen} />;
@@ -73,11 +73,11 @@ export const AppRouter = () => {
     return <ContextConsumer Component={Component} />;
   };
 
-  // 🆕 .env ෆයිල් එකෙන් ආරක්ෂිතව Google Client ID එක කියවා ගැනීම
+  
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
   return (
-    // 🆕 Hardcoded string එක වෙනුවට .env variable එක මෙතනට ආදේශ කළා
+    
     <GoogleOAuthProvider clientId={googleClientId}>
       <BrowserRouter>
         <Routes>
@@ -96,7 +96,7 @@ export const AppRouter = () => {
               </RequireAuth>
             }
           >
-            {/* Student Dashboard එක ඇතුළේ වැඩ කරන Sub-Routes ටික */}
+            
             <Route index element={<Navigate to="/dashboard/videos" replace />} />
             <Route path="videos" element={renderWithProps(VideoTutorials)} />
             <Route path="exams" element={renderWithProps(ExamPapers)} />

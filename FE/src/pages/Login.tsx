@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { login, getMyDetails } from "../service/authService";
-// 🆕 Google Authentication සඳහා අවශ්‍ය කොටස් Import කරගැනීම
+
 import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios"; 
 
@@ -41,16 +41,16 @@ const Login = () => {
     }
   };
 
-  // 🆕 Google Login එක සාර්ථක වූ විට ක්‍රියාත්මක වන Smart Handler එක
+  
   const handleGoogleSuccess = async (credentialResponse: any) => {
-    const idToken = credentialResponse.credential; // Google එකෙන් දෙන ආරක්ෂිත Token එක
+    const idToken = credentialResponse.credential; 
     
     try {
-      // Backend එකට Token එක යවා පරිශීලකයා දැනටමත් DB එකේ සිටීදැයි පරීක්ෂා කිරීම
+      
       const res = await axios.post("http://localhost:5000/api/v1/auth/google-check", { token: idToken });
       
       if (res.data.status === "SUCCESS") {
-        // ශිෂ්‍යයා දැනටමත් ලියාපදිංචි වී සිටී නම් කෙලින්ම Dashboard එකට
+        
         localStorage.setItem("ACCESS_TOKEN", res.data.accessToken);
         localStorage.setItem("REFRESH_TOKEN", res.data.refreshToken);
         
@@ -58,7 +58,7 @@ const Login = () => {
         setUser(profileData?.user || profileData);
         navigate("/dashboard");
       } else if (res.data.status === "NOT_FOUND") {
-        // ⚡ ශිෂ්‍යයා අලුත් කෙනෙක් නම්, Google දත්තද සමඟින් ඔහුව Register පෝරමයට හරවා යැවීම
+        
         navigate("/register", { 
           state: { 
             googleName: res.data.name, 

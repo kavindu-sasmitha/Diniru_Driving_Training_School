@@ -60,11 +60,11 @@ const Register = () => {
           </p>
         </div>
 
-        {/* Form Body Container - Smooth scroll for mobile keyboards */}
+          {/* --- Register Form Section --- */}
         <div className="p-6 sm:p-10 max-h-[78vh] sm:max-h-none overflow-y-auto scrollbar-thin">
           <div className="text-center mb-5 sm:mb-6">
             <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase">
-              {/* 🆕 Google එකෙන් ආ කෙනෙක් නම් උපදෙස වෙනස් කර පෙන්වීම */}
+              
               {googleEmail ? "Complete Profile" : "Create Account"}
             </h2>
             <p className="text-xs text-slate-400 mt-1">
@@ -85,7 +85,7 @@ const Register = () => {
                 onChange={(e) => setName(e.target.value)}
                 type="text"
                 placeholder="John Doe"
-                disabled={!!googleName} // 🆕 Google එකෙන් නම ඇවිත් නම් මේ field එක block (disabled) වේ
+                disabled={!!googleName} 
                 className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-slate-900 focus:bg-white transition-all disabled:opacity-70 disabled:bg-slate-100 disabled:cursor-not-allowed"
               />
             </div>
@@ -100,7 +100,7 @@ const Register = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 type="email"
                 placeholder="student@example.com"
-                disabled={!!googleEmail} // 🆕 Google එකෙන් Email එක ඇවිත් නම් මේ field එක block (disabled) වේ
+                disabled={!!googleEmail} 
                 className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-slate-900 focus:bg-white transition-all disabled:opacity-70 disabled:bg-slate-100 disabled:cursor-not-allowed"
               />
             </div>
