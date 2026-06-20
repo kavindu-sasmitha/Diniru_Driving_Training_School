@@ -3,7 +3,9 @@ import { examService } from "../services/examService";
 
 interface AuthRequest extends Request {
   user: {
-    sub: string;
+    sub?: string;
+    _id?: string;
+    id?: string;
     [key: string]: any;
   };
 }
@@ -90,12 +92,10 @@ export const updateExamPaper = async (req: Request, res: Response) => {
         .status(404)
         .json({ message: "Exam paper not found to update" });
     }
-    res
-      .status(200)
-      .json({
-        message: "Exam paper updated successfully..!",
-        data: updatedPaper,
-      });
+    res.status(200).json({
+      message: "Exam paper updated successfully..!",
+      data: updatedPaper,
+    });
   } catch (err: any) {
     console.error(err);
     res
@@ -130,7 +130,17 @@ export const deleteExamPaper = async (req: Request, res: Response) => {
 // 6. Submit Exam Paper Logic
 export const submitExam = async (req: AuthRequest, res: Response) => {
   const { examPaperId, answers } = req.body;
-  const studentId = req.user.sub; // Extracts login user id from token auth
+
+  // 💡 CHANGE: Fallback to alternative user ID properties if sub is undefined
+  const studentId = req.user.sub || req.user._id || req.user.id;
+
+  if (!studentId) {
+    return res
+      .status(401)
+      .json({
+        message: "Unauthorized! Student ID could not be resolved from token.",
+      });
+  }
 
   try {
     const paper = await examService.getPaperByIdForAdmin(examPaperId);
@@ -140,6 +150,7 @@ export const submitExam = async (req: AuthRequest, res: Response) => {
 
     let scoreCount = 0;
     paper.questions.forEach((q, idx) => {
+      // Handles both frontend Array approach smoothly
       if (answers[idx] === q.correctOptionIndex) {
         scoreCount++;
       }
@@ -155,7 +166,7 @@ export const submitExam = async (req: AuthRequest, res: Response) => {
       examPaperId,
       score: scorePercentage,
       passed,
-      answers,
+      answers, // Expected: Array of numbers [0, 2, 1]
     });
 
     res.status(200).json({
@@ -177,7 +188,11 @@ export const getMyExamResults = async (req: AuthRequest, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
   const skip = (page - 1) * limit;
-  const studentId = req.user.sub;
+  const studentId = req.user.sub || req.user._id || req.user.id;
+
+  if (!studentId) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
 
   try {
     const results = await examService.getStudentResults(studentId, skip, limit);
@@ -192,11 +207,9 @@ export const getMyExamResults = async (req: AuthRequest, res: Response) => {
     });
   } catch (err: any) {
     console.error(err);
-    res
-      .status(500)
-      .json({
-        message: "Failed to fetch student performance history",
-        error: err.message,
-      });
+    res.status(500).json({
+      message: "Failed to fetch student performance history",
+      error: err.message,
+    });
   }
 };

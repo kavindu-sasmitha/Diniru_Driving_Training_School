@@ -4,9 +4,8 @@ import {
   loginUser,
   refreshTokens,
   getMe,
-  getSingleStudentForAdmin, 
 } from "../controllers/authController";
-import { protect, restrictToAdmin } from "../middleware/authMiddleware"; 
+import { protect } from "../middleware/authMiddleware";
 import { googleCheck } from "../controllers/authController";
 
 const router = express.Router();
@@ -17,9 +16,7 @@ router.post("/login", loginUser);
 router.post("/refresh-token", refreshTokens);
 router.post("/google-check", googleCheck);
 
-
+// Protected account profile lookup vector
 router.get("/me", protect as any, getMe);
 
-
-router.get("/students/:query", protect as any, restrictToAdmin as any, getSingleStudentForAdmin);
 export default router;
