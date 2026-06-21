@@ -32,23 +32,20 @@ export const registerStudent = async (req: Request, res: Response) => {
       .json({ message: "Failed to register student", error: err.message });
   }
 };
+
 export const googleCallback = async (req: Request, res: Response) => {
   try {
-    const { code } = req.query; // Google එකෙන් එවන්නේ authorization code එකක්
+    const { code } = req.query;
 
     if (!code) {
       return res.status(400).json({ message: "Authorization code missing" });
     }
 
-    // code එක දීලා tokens exchange කරගන්න ඕනේ
     const { tokens } = await client.getToken(code as string);
     client.setCredentials(tokens);
 
-    // ඉතිරි logic එක (User check කරලා login කරන එක)
-    // ...
-    
-    // සාර්ථක නම් frontend එකට redirect කරන්න
-    res.redirect(`https://diniru-driving-training-school-backend.vercel.app/api/v1/auth/google/callback?token=${tokens.access_token}`);
+    // ✅ FIXED: redirect to frontend URL
+    res.redirect(`https://diniru-driving-training-school.vercel.app/auth/google/callback?token=${tokens.access_token}`);
   } catch (err: any) {
     console.error("Callback error:", err);
     res.status(500).json({ message: "Callback failed" });
@@ -81,7 +78,6 @@ export const googleCheck = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Google token is required!" });
     }
 
-    
     const ticket = await client.verifyIdToken({
       idToken: token,
       audience: process.env.GOOGLE_CLIENT_ID,
@@ -95,11 +91,9 @@ export const googleCheck = async (req: Request, res: Response) => {
     const email = payload.email;
     const name = payload.name || "";
 
-    
     const user = await User.findOne({ email });
 
     if (user) {
-      
       const tokenData = await authService.loginGoogleUserService(user);
 
       return res.status(200).json({
@@ -109,7 +103,6 @@ export const googleCheck = async (req: Request, res: Response) => {
       });
       
     } else {
-      
       return res.status(200).json({
         status: "NOT_FOUND",
         message: "User not registered in database",
@@ -169,33 +162,26 @@ export const getSingleStudentForAdmin = async (req: Request, res: Response) => {
   try {
     let studentDetails = null;
 
-    
     const isObjectId = /^[0-9a-fA-F]{24}$/.test(query);
 
     if (isObjectId) {
-      
       studentDetails = await Student.findById(query).populate(
         "userId",
         "-password",
       );
     }
 
-    
     if (!studentDetails) {
-     
       studentDetails = await Student.findOne({ nicNumber: query }).populate(
         "userId",
         "-password",
       );
     }
 
-    
     if (!studentDetails) {
-      
       const user = await User.findOne({ phoneNumber: query });
 
       if (user) {
-       
         studentDetails = await Student.findOne({ userId: user._id }).populate(
           "userId",
           "-password",
@@ -203,7 +189,6 @@ export const getSingleStudentForAdmin = async (req: Request, res: Response) => {
       }
     }
 
-    
     if (!studentDetails) {
       return res
         .status(404)
