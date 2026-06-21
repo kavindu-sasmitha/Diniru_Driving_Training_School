@@ -18,6 +18,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get("/", (req, res) => {
+    res.send("ok")
+})
+
+
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/exams", examRoutes);
