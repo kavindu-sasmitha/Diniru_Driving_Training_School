@@ -2,9 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { login, getMyDetails } from "../service/authService";
-
 import { GoogleLogin } from "@react-oauth/google";
-import axios from "axios"; 
+import axios from "axios";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -16,20 +15,14 @@ const Login = () => {
     if (!email || !password) {
       return alert("Required all fields!");
     }
-
     try {
-      // Axios interceptor instance standard endpoints structure wrapper
       const data = await login(email, password);
       const accessToken = data?.accessToken;
       const refreshToken = data?.refreshToken;
-
       if (accessToken && refreshToken) {
         localStorage.setItem("ACCESS_TOKEN", accessToken);
         localStorage.setItem("REFRESH_TOKEN", refreshToken);
-
-        // Call user context details profile mapping using customized axios service
         const profileData = await getMyDetails();
-
         setUser(profileData?.user || profileData);
         navigate("/dashboard");
       } else {
@@ -41,29 +34,22 @@ const Login = () => {
     }
   };
 
-  
   const handleGoogleSuccess = async (credentialResponse: any) => {
-    const idToken = credentialResponse.credential; 
-    
+    const idToken = credentialResponse.credential;
     try {
-      
       const res = await axios.post("http://localhost:5000/api/v1/auth/google-check", { token: idToken });
-      
       if (res.data.status === "SUCCESS") {
-        
         localStorage.setItem("ACCESS_TOKEN", res.data.accessToken);
         localStorage.setItem("REFRESH_TOKEN", res.data.refreshToken);
-        
         const profileData = await getMyDetails();
         setUser(profileData?.user || profileData);
         navigate("/dashboard");
       } else if (res.data.status === "NOT_FOUND") {
-        
-        navigate("/register", { 
-          state: { 
-            googleName: res.data.name, 
-            googleEmail: res.data.email 
-          } 
+        navigate("/register", {
+          state: {
+            googleName: res.data.name,
+            googleEmail: res.data.email
+          }
         });
       }
     } catch (err: any) {
@@ -73,40 +59,42 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f1f5f9] font-sans antialiased p-4 sm:p-6 relative overflow-hidden">
-      
-      {/* Background Subtle Accent Geometry */}
-      <div className="absolute top-0 right-0 w-64 h-64 sm:w-96 sm:h-96 bg-[#FF5500]/5 rounded-bl-full pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-48 h-48 sm:w-64 sm:h-64 bg-slate-900/[0.02] pointer-events-none" />
+    <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] font-sans antialiased p-4 sm:p-6 relative overflow-hidden">
+      {/* Background Accent */}
+      <div className="absolute top-0 right-0 w-80 h-80 bg-[#15803d]/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#4ade80]/5 rounded-full blur-3xl pointer-events-none" />
 
-      {/* --- Main Login Card Box --- */}
-      <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-xl shadow-slate-200/50 w-full max-w-md overflow-hidden relative z-10 transition-all duration-300">
-        
-        {/* Top Decorative Branding Bar */}
-        <div className="bg-slate-900 text-white p-6 sm:p-8 text-center border-b-4 border-[#FF5500]">
-          <div className="text-xl font-black tracking-wider uppercase mb-1">
-            DINIRU<span className="text-[#FF5500]">.</span>
+      {/* Main Login Card */}
+      <div className="bg-white rounded-3xl border border-gray-100 shadow-2xl shadow-gray-200/70 w-full max-w-md overflow-hidden relative z-10">
+        {/* Top Branding Bar */}
+        <div className="bg-[#052e16] text-white p-8 text-center">
+          <div className="flex justify-center mb-3">
+            <div className="w-12 h-12 bg-[#15803d] rounded-2xl flex items-center justify-center">
+              <svg width="28" height="28" fill="white" viewBox="0 0 24 24">
+                <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99z"/>
+                <circle cx="7.5" cy="14.5" r="1.5"/>
+                <circle cx="16.5" cy="14.5" r="1.5"/>
+              </svg>
+            </div>
           </div>
-          <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase">
-            Driving Training School
-          </p>
+          <div className="text-2xl font-black tracking-tighter">DINIRU</div>
+          <div className="text-[10px] font-bold tracking-[2px] uppercase text-[#4ade80] -mt-1">
+            DRIVING SCHOOL
+          </div>
         </div>
 
-        {/* Form Body Container */}
-        <div className="p-6 sm:p-10">
-          <div className="text-center mb-6 sm:mb-8">
-            <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase">
-              Welcome Back
-            </h2>
-            <p className="text-xs text-slate-400 mt-1">
-              Log in to secure your student portal dashboard.
+        {/* Form Content */}
+        <div className="p-8 sm:p-10">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-black tracking-tight text-gray-900">Welcome Back</h2>
+            <p className="text-sm text-gray-500 mt-2">
+              Sign in to access your student dashboard
             </p>
           </div>
 
-          <div className="space-y-4 sm:space-y-5">
-            
-            {/* 🆕 Official Google Login Button Integration */}
-            <div className="flex justify-center w-full pt-1 pb-1">
+          <div className="space-y-6">
+            {/* Google Login */}
+            <div className="flex justify-center">
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={() => alert("Google Sign-In was unsuccessful. Please try again.")}
@@ -114,76 +102,77 @@ const Login = () => {
                 size="large"
                 width="100%"
                 text="signin_with"
-                shape="circle"
+                shape="rectangular"
               />
             </div>
 
-            {/* Content Divider Text */}
-            <div className="relative flex py-1 items-center">
-              <div className="flex-grow border-t border-slate-200"></div>
-              <span className="flex-shrink mx-4 text-slate-400 text-[10px] font-bold uppercase tracking-wider">
-                Or login with email
+            {/* Divider */}
+            <div className="relative flex items-center py-2">
+              <div className="flex-grow border-t border-gray-200"></div>
+              <span className="px-4 text-xs font-medium text-gray-400 uppercase tracking-widest">
+                OR
               </span>
-              <div className="flex-grow border-t border-slate-200"></div>
+              <div className="flex-grow border-t border-gray-200"></div>
             </div>
 
-            {/* Email Input Field */}
+            {/* Email */}
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                Email Address
+              <label className="block text-xs font-semibold text-gray-500 mb-2 tracking-wider">
+                EMAIL ADDRESS
               </label>
               <input
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 type="email"
                 placeholder="student@example.com"
-                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-slate-900 focus:bg-white transition-all"
+                className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:border-[#15803d] focus:bg-white outline-none transition-all text-sm"
               />
             </div>
 
-            {/* Password Input Field */}
+            {/* Password */}
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                Password
+              <label className="block text-xs font-semibold text-gray-500 mb-2 tracking-wider">
+                PASSWORD
               </label>
               <input
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 type="password"
                 placeholder="••••••••"
-                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-slate-900 focus:bg-white transition-all"
+                className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:border-[#15803d] focus:bg-white outline-none transition-all text-sm"
               />
+              {/* Forgot Password Link */}
+              <div className="text-right mt-2">
+                <button
+                  type="button"
+                  onClick={() => navigate("/forgot-password")}
+                  className="text-xs font-semibold text-[#15803d] hover:underline"
+                >
+                  Forgot Password?
+                </button>
+              </div>
             </div>
 
-            {/* Action Submit Button */}
-            <div className="pt-2">
-              <button
-                onClick={handleLogin}
-                className="w-full bg-[#FF5500] hover:bg-[#e04b00] text-white p-3.5 rounded-xl text-xs font-extrabold tracking-widest uppercase shadow-md hover:shadow-lg transition-all duration-200 active:scale-98"
-              >
-                Sign In
-              </button>
-            </div>
+            {/* Sign In Button */}
+            <button
+              onClick={handleLogin}
+              className="w-full bg-[#15803d] hover:bg-[#166534] text-white py-4 rounded-2xl font-bold tracking-wider text-sm transition-all active:scale-[0.985]"
+            >
+              SIGN IN
+            </button>
 
-            {/* Subtle Divider */}
-            <div className="relative flex py-1 items-center">
-              <div className="flex-grow border-t border-slate-100"></div>
-              <div className="flex-grow border-t border-slate-100"></div>
-            </div>
-
-            {/* Bottom Navigation Link */}
-            <div className="text-xs text-center text-slate-500 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
-              <span>New to Diniru Driving School?</span>
+            {/* Register Link */}
+            <div className="text-center text-sm text-gray-500">
+              New to Diniru Driving School?{" "}
               <button
                 onClick={() => navigate("/register")}
-                className="text-[#FF5500] font-black hover:underline tracking-wide focus:outline-none uppercase text-[10px] sm:text-[11px] mt-1 sm:mt-0"
+                className="text-[#15803d] font-semibold hover:underline"
               >
                 Register here
               </button>
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import api from "../service/api";
+import UploadVideo from "./UploadVideo";
+import AddExamPaper from "./AddExamPaper";
 
 export default function AdminDashboard() {
   const [adminTab, setAdminTab] = useState<
     "students" | "addVideo" | "addExam" | "trainingStudents"
   >("students");
 
-  // Search States
+  // Search States (for students)
   const [searchQuery, setSearchQuery] = useState("");
   const [studentData, setStudentData] = useState<any>(null);
   const [searchError, setSearchError] = useState("");
@@ -26,27 +28,6 @@ export default function AdminDashboard() {
   const [trainingStudents, setTrainingStudents] = useState<any[]>([]);
   const [loadingTraining, setLoadingTraining] = useState(false);
 
-  // Add Video States
-  const [videoForm, setVideoForm] = useState({
-    title: "",
-    description: "",
-    videoUrl: "",
-    category: "PRACTICAL",
-  });
-  const [videoSuccess, setVideoSuccess] = useState("");
-
-  // Add Exam Paper States
-  const [examTitle, setExamTitle] = useState("");
-  const [questions, setQuestions] = useState<any[]>([
-    {
-      questionText: "",
-      imageUrl: "",
-      options: ["", "", "", ""],
-      correctOptionIndex: 0,
-    },
-  ]);
-  const [examSuccess, setExamSuccess] = useState("");
-
   const handleStudentSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
@@ -58,18 +39,17 @@ export default function AdminDashboard() {
 
     try {
       const res = await api.get(
-        `/admin/search-student?query=${searchQuery.trim()}`,
+        `/admin/search-student?query=${searchQuery.trim()}`
       );
       setStudentData(res.data.data);
     } catch (err: any) {
       setSearchError(
         err.response?.data?.message ||
-          "No student record found with provided inputs.",
+          "No student record found with provided inputs."
       );
     }
   };
 
-  // ── Clear Search Handler ──
   const handleClearSearch = () => {
     setSearchQuery("");
     setStudentData(null);
@@ -121,7 +101,7 @@ export default function AdminDashboard() {
       }));
     } catch (err: any) {
       alert(
-        err.response?.data?.message || "Failed to configure total course fee.",
+        err.response?.data?.message || "Failed to configure total course fee."
       );
     }
   };
@@ -138,7 +118,7 @@ export default function AdminDashboard() {
       });
 
       setPaymentSuccess(
-        `Payment of Rs. ${customPayAmount.toLocaleString()} added successfully! ✅`,
+        `Payment of Rs. ${customPayAmount.toLocaleString()} added successfully! ✅`
       );
       setStudentData((prev: any) => ({
         ...prev,
@@ -151,7 +131,7 @@ export default function AdminDashboard() {
       setCustomPayAmount(0);
     } catch (err: any) {
       alert(
-        err.response?.data?.message || "Failed to process payment collection.",
+        err.response?.data?.message || "Failed to process payment collection."
       );
     }
   };
@@ -199,84 +179,6 @@ export default function AdminDashboard() {
     }
   }, [adminTab]);
 
-  const handleAddVideo = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setVideoSuccess("");
-    try {
-      await api.post("/videos/add", videoForm);
-      setVideoSuccess("Driving tutorial added successfully! 🚀");
-      setVideoForm({
-        title: "",
-        description: "",
-        videoUrl: "",
-        category: "PRACTICAL",
-      });
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleAddQuestionRow = () => {
-    setQuestions([
-      ...questions,
-      {
-        questionText: "",
-        imageUrl: "",
-        options: ["", "", "", ""],
-        correctOptionIndex: 0,
-      },
-    ]);
-  };
-
-  const handleQuestionTextChange = (index: number, text: string) => {
-    const updated = [...questions];
-    updated[index].questionText = text;
-    setQuestions(updated);
-  };
-
-  const handleQuestionImageUrlChange = (index: number, url: string) => {
-    const updated = [...questions];
-    updated[index].imageUrl = url;
-    setQuestions(updated);
-  };
-
-  const handleOptionTextChange = (
-    qIndex: number,
-    oIndex: number,
-    text: string,
-  ) => {
-    const updated = [...questions];
-    updated[qIndex].options[oIndex] = text;
-    setQuestions(updated);
-  };
-
-  const handleCorrectOptionChange = (qIndex: number, val: number) => {
-    const updated = [...questions];
-    updated[qIndex].correctOptionIndex = val;
-    setQuestions(updated);
-  };
-
-  const handlePublishExamPaper = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setExamSuccess("");
-    const payload = { title: examTitle, questions: questions };
-    try {
-      await api.post("/exams/create", payload);
-      setExamSuccess("Exam Paper created and published successfully..! 🎉");
-      setExamTitle("");
-      setQuestions([
-        {
-          questionText: "",
-          imageUrl: "",
-          options: ["", "", "", ""],
-          correctOptionIndex: 0,
-        },
-      ]);
-    } catch (err) {
-      console.error("Failed to create exam paper:", err);
-    }
-  };
-
   const handleLogout = () => {
     localStorage.removeItem("jwtToken");
     localStorage.removeItem("refreshToken");
@@ -297,13 +199,21 @@ export default function AdminDashboard() {
           <nav className="space-y-2">
             <button
               onClick={() => setAdminTab("students")}
-              className={`w-full flex items-center space-x-3 py-3 px-4 rounded-xl text-sm font-medium transition-all ${adminTab === "students" ? "bg-slate-800 text-amber-400 font-semibold shadow-lg" : "text-slate-300 hover:bg-slate-800"}`}
+              className={`w-full flex items-center space-x-3 py-3 px-4 rounded-xl text-sm font-medium transition-all ${
+                adminTab === "students"
+                  ? "bg-slate-800 text-amber-400 font-semibold shadow-lg"
+                  : "text-slate-300 hover:bg-slate-800"
+              }`}
             >
               <span>🧑‍🎓</span> <span>Manage Students</span>
             </button>
             <button
               onClick={() => setAdminTab("trainingStudents")}
-              className={`w-full flex items-center space-x-3 py-3 px-4 rounded-xl text-sm font-medium transition-all ${adminTab === "trainingStudents" ? "bg-slate-800 text-amber-400 font-semibold shadow-lg" : "text-slate-300 hover:bg-slate-800"}`}
+              className={`w-full flex items-center space-x-3 py-3 px-4 rounded-xl text-sm font-medium transition-all ${
+                adminTab === "trainingStudents"
+                  ? "bg-slate-800 text-amber-400 font-semibold shadow-lg"
+                  : "text-slate-300 hover:bg-slate-800"
+              }`}
             >
               <span>🚗</span> <span>Training Trainees</span>
               {trainingStudents.length > 0 && (
@@ -314,13 +224,21 @@ export default function AdminDashboard() {
             </button>
             <button
               onClick={() => setAdminTab("addVideo")}
-              className={`w-full flex items-center space-x-3 py-3 px-4 rounded-xl text-sm font-medium transition-all ${adminTab === "addVideo" ? "bg-slate-800 text-amber-400 font-semibold shadow-lg" : "text-slate-300 hover:bg-slate-800"}`}
+              className={`w-full flex items-center space-x-3 py-3 px-4 rounded-xl text-sm font-medium transition-all ${
+                adminTab === "addVideo"
+                  ? "bg-slate-800 text-amber-400 font-semibold shadow-lg"
+                  : "text-slate-300 hover:bg-slate-800"
+              }`}
             >
               <span>📹</span> <span>Upload Video</span>
             </button>
             <button
               onClick={() => setAdminTab("addExam")}
-              className={`w-full flex items-center space-x-3 py-3 px-4 rounded-xl text-sm font-medium transition-all ${adminTab === "addExam" ? "bg-slate-800 text-amber-400 font-semibold shadow-lg" : "text-slate-300 hover:bg-slate-800"}`}
+              className={`w-full flex items-center space-x-3 py-3 px-4 rounded-xl text-sm font-medium transition-all ${
+                adminTab === "addExam"
+                  ? "bg-slate-800 text-amber-400 font-semibold shadow-lg"
+                  : "text-slate-300 hover:bg-slate-800"
+              }`}
             >
               <span>📝</span> <span>Add Exam Paper</span>
             </button>
@@ -367,7 +285,6 @@ export default function AdminDashboard() {
               >
                 Search
               </button>
-              {/* ── Clear Button — only visible when there's something to clear ── */}
               {(studentData || searchQuery || searchError) && (
                 <button
                   type="button"
@@ -400,7 +317,11 @@ export default function AdminDashboard() {
                         </span>
                       </h3>
                       <span
-                        className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold ${studentData.userId?.approved ? "bg-green-50 text-green-700 border border-green-200" : "bg-amber-50 text-amber-700 border border-amber-200"}`}
+                        className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold ${
+                          studentData.userId?.approved
+                            ? "bg-green-50 text-green-700 border border-green-200"
+                            : "bg-amber-50 text-amber-700 border border-amber-200"
+                        }`}
                       >
                         {studentData.userId?.approved
                           ? "APPROVED ACCESS"
@@ -454,7 +375,6 @@ export default function AdminDashboard() {
                         </p>
                       </div>
 
-                      {/* Course Fee Metrics Display boxes */}
                       <div className="p-3 bg-indigo-50/50 border border-indigo-100 rounded-xl">
                         <p className="text-indigo-600 font-bold">
                           Total Assigned Fee
@@ -486,7 +406,7 @@ export default function AdminDashboard() {
                         <p className="text-orange-600 font-black text-sm mt-0.5">
                           {studentData.examDate
                             ? new Date(
-                                studentData.examDate,
+                                studentData.examDate
                               ).toLocaleDateString()
                             : "Not Scheduled Yet ❌"}
                         </p>
@@ -506,7 +426,13 @@ export default function AdminDashboard() {
                           Status:
                         </span>
                         <span
-                          className={`px-2 py-0.5 rounded ${studentData.paymentStatus === "COMPLETED" ? "bg-green-100 text-green-800" : studentData.paymentStatus === "PARTIAL" ? "bg-blue-100 text-blue-800" : "bg-red-100 text-red-800"}`}
+                          className={`px-2 py-0.5 rounded ${
+                            studentData.paymentStatus === "COMPLETED"
+                              ? "bg-green-100 text-green-800"
+                              : studentData.paymentStatus === "PARTIAL"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
                         >
                           {studentData.paymentStatus || "PENDING"}
                         </span>
@@ -554,7 +480,7 @@ export default function AdminDashboard() {
                                     </span>
                                   </td>
                                 </tr>
-                              ),
+                              )
                             )}
                           </tbody>
                         </table>
@@ -592,8 +518,8 @@ export default function AdminDashboard() {
                       {loadingApprove
                         ? "Processing Approval..."
                         : studentData.userId?.approved
-                          ? "✓ Account Approved"
-                          : "Approve Account Now"}
+                        ? "✓ Account Approved"
+                        : "Approve Account Now"}
                     </button>
                   </div>
 
@@ -776,7 +702,7 @@ export default function AdminDashboard() {
                           <td className="p-4 text-emerald-600 font-bold">
                             {student.practicalStartDate
                               ? new Date(
-                                  student.practicalStartDate,
+                                  student.practicalStartDate
                                 ).toLocaleDateString()
                               : "N/A"}
                           </td>
@@ -786,8 +712,8 @@ export default function AdminDashboard() {
                                 student.paymentStatus === "COMPLETED"
                                   ? "bg-green-100 text-green-800"
                                   : student.paymentStatus === "PARTIAL"
-                                    ? "bg-blue-100 text-blue-800"
-                                    : "bg-red-100 text-red-800"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : "bg-red-100 text-red-800"
                               }`}
                             >
                               {student.paymentStatus || "PENDING"}
@@ -816,239 +742,10 @@ export default function AdminDashboard() {
         )}
 
         {/* ── 📹 UPLOAD VIDEO TAB ── */}
-        {adminTab === "addVideo" && (
-          <div className="max-w-xl bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <h1 className="text-xl font-bold text-gray-900 mb-1">
-              Upload Driving Tutorial
-            </h1>
-            <p className="text-gray-500 text-xs mb-6">
-              Publish a new clip to the student video feed library
-            </p>
-
-            {videoSuccess && (
-              <div className="text-green-700 bg-green-50 border border-green-200 p-3 rounded-xl mb-4 text-xs font-semibold">
-                {videoSuccess}
-              </div>
-            )}
-
-            <form onSubmit={handleAddVideo} className="space-y-4 text-xs">
-              <div>
-                <label className="block text-gray-600 font-semibold mb-1">
-                  Video Clip Title
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={videoForm.title}
-                  onChange={(e) =>
-                    setVideoForm({ ...videoForm, title: e.target.value })
-                  }
-                  placeholder="e.g., How to do a Perfect Parallel Parking"
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-slate-800 focus:outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-600 font-semibold mb-1">
-                  Detailed Description
-                </label>
-                <textarea
-                  rows={3}
-                  required
-                  value={videoForm.description}
-                  onChange={(e) =>
-                    setVideoForm({ ...videoForm, description: e.target.value })
-                  }
-                  placeholder="Provide brief steps or guidelines about the tutorial video clip..."
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-slate-800 focus:outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-600 font-semibold mb-1">
-                  YouTube Video Link URL
-                </label>
-                <input
-                  type="url"
-                  required
-                  value={videoForm.videoUrl}
-                  onChange={(e) =>
-                    setVideoForm({ ...videoForm, videoUrl: e.target.value })
-                  }
-                  placeholder="e.g., https://www.youtube.com/watch?v=..."
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-slate-800 focus:outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-600 font-semibold mb-1">
-                  Lesson Category Tag
-                </label>
-                <select
-                  value={videoForm.category}
-                  onChange={(e) =>
-                    setVideoForm({ ...videoForm, category: e.target.value })
-                  }
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 bg-white focus:ring-2 focus:ring-slate-800 focus:outline-none"
-                >
-                  <option value="PRACTICAL">Practical Test Tips</option>
-                  <option value="THEORY">Theory Lessons</option>
-                  <option value="ROAD_RULES">Road Rules & Signs</option>
-                </select>
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition text-xs mt-4 shadow-md"
-              >
-                Publish Clip
-              </button>
-            </form>
-          </div>
-        )}
+        {adminTab === "addVideo" && <UploadVideo />}
 
         {/* ── 📝 ADD EXAM PAPER TAB ── */}
-        {adminTab === "addExam" && (
-          <div className="max-w-3xl bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <h1 className="text-xl font-bold text-gray-900 mb-1">
-              Create Theory Exam Paper
-            </h1>
-            <p className="text-gray-500 text-xs mb-6">
-              Build a dynamic MCQ evaluation structure with answers for student
-              access
-            </p>
-
-            {examSuccess && (
-              <div className="text-green-700 bg-green-50 border border-green-200 p-3 rounded-xl mb-4 text-xs font-semibold">
-                {examSuccess}
-              </div>
-            )}
-
-            <form
-              onSubmit={handlePublishExamPaper}
-              className="space-y-6 text-xs"
-            >
-              <div>
-                <label className="block text-gray-600 font-semibold mb-1">
-                  Exam Paper Title
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={examTitle}
-                  onChange={(e) => setExamTitle(e.target.value)}
-                  placeholder="e.g., Light Vehicle Theory Test - 01"
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-slate-800 focus:outline-none"
-                />
-              </div>
-
-              {/* Dynamic Question List Iterator Mapping */}
-              <div className="space-y-6 border-t border-gray-100 pt-4">
-                <h3 className="text-sm font-bold text-gray-800 mb-2">
-                  MCQ Questions Stack
-                </h3>
-
-                {questions.map((q, qIdx) => (
-                  <div
-                    key={qIdx}
-                    className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-3 relative"
-                  >
-                    <span className="absolute top-3 right-4 font-bold text-gray-300">
-                      #{qIdx + 1}
-                    </span>
-
-                    <div>
-                      <label className="block text-gray-600 font-semibold mb-1">
-                        Question Statement
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={q.questionText}
-                        onChange={(e) =>
-                          handleQuestionTextChange(qIdx, e.target.value)
-                        }
-                        placeholder="Type the question here..."
-                        className="w-full border border-gray-200 rounded-xl px-4 py-2 bg-white focus:ring-2 focus:ring-slate-800 focus:outline-none"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-gray-600 font-semibold mb-1">
-                        Traffic Sign Image URL{" "}
-                        <span className="text-gray-400 font-normal">
-                          (Optional)
-                        </span>
-                      </label>
-                      <input
-                        type="url"
-                        value={q.imageUrl || ""}
-                        onChange={(e) =>
-                          handleQuestionImageUrlChange(qIdx, e.target.value)
-                        }
-                        placeholder="e.g., https://your-storage.com/signs/u-turn.png"
-                        className="w-full border border-gray-200 rounded-xl px-4 py-2 bg-white focus:ring-2 focus:ring-slate-800 focus:outline-none"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {q.options.map((opt: string, oIdx: number) => (
-                        <div key={oIdx}>
-                          <label className="block text-gray-500 text-[10px] mb-0.5">
-                            Option {oIdx + 1}
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            value={opt}
-                            onChange={(e) =>
-                              handleOptionTextChange(qIdx, oIdx, e.target.value)
-                            }
-                            placeholder={`Answer choice ${oIdx + 1}`}
-                            className="w-full border border-gray-200 rounded-xl px-3 py-1.5 bg-white focus:ring-2 focus:ring-slate-800 focus:outline-none"
-                          />
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="w-full md:w-1/2 pt-2">
-                      <label className="block text-gray-600 font-semibold mb-1">
-                        Correct Answer Index
-                      </label>
-                      <select
-                        value={q.correctOptionIndex}
-                        onChange={(e) =>
-                          handleCorrectOptionChange(
-                            qIdx,
-                            parseInt(e.target.value),
-                          )
-                        }
-                        className="w-full border border-gray-200 rounded-xl px-3 py-1.5 bg-white focus:ring-2 focus:ring-slate-800 focus:outline-none"
-                      >
-                        <option value={0}>Option 1 is correct</option>
-                        <option value={1}>Option 2 is correct</option>
-                        <option value={2}>Option 3 is correct</option>
-                        <option value={3}>Option 4 is correct</option>
-                      </select>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex space-x-3 pt-2">
-                <button
-                  type="button"
-                  onClick={handleAddQuestionRow}
-                  className="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-semibold px-4 py-2 rounded-xl transition shadow-sm"
-                >
-                  ➕ Add Question
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-xl transition shadow-md"
-                >
-                  Publish Exam Paper
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
+        {adminTab === "addExam" && <AddExamPaper />}
       </div>
     </div>
   );

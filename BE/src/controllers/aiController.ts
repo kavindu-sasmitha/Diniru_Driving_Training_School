@@ -33,7 +33,7 @@ export const askAiTeacher = async (req: Request, res: Response) => {
         }
       ],
       generationConfig: {
-        maxOutputTokens: 2048, 
+        maxOutputTokens: 4096, 
         temperature: 0.7
       }
     });
