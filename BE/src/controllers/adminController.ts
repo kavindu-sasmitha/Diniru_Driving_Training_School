@@ -97,10 +97,9 @@ export const searchStudentFullDetails = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "No matching student records found across the driving school system" });
     }
 
-    // ✅ FIXED: wrap _id in new Types.ObjectId() to resolve TS2769 overload error
     const marksHistory = await ExamResult.find({
-      studentId: new Types.ObjectId(studentProfile._id.toString())
-    })
+      studentId: studentProfile._id
+    } as any)
       .populate("examPaperId", "title")
       .sort({ createdAt: -1 });
 
