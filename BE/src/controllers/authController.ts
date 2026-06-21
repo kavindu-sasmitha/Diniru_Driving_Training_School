@@ -32,6 +32,28 @@ export const registerStudent = async (req: Request, res: Response) => {
       .json({ message: "Failed to register student", error: err.message });
   }
 };
+export const googleCallback = async (req: Request, res: Response) => {
+  try {
+    const { code } = req.query; // Google එකෙන් එවන්නේ authorization code එකක්
+
+    if (!code) {
+      return res.status(400).json({ message: "Authorization code missing" });
+    }
+
+    // code එක දීලා tokens exchange කරගන්න ඕනේ
+    const { tokens } = await client.getToken(code as string);
+    client.setCredentials(tokens);
+
+    // ඉතිරි logic එක (User check කරලා login කරන එක)
+    // ...
+    
+    // සාර්ථක නම් frontend එකට redirect කරන්න
+    res.redirect(`https://diniru-driving-training-school-backend.vercel.app/api/v1/auth/google/callback?token=${tokens.access_token}`);
+  } catch (err: any) {
+    console.error("Callback error:", err);
+    res.status(500).json({ message: "Callback failed" });
+  }
+};
 
 
 export const loginUser = async (req: Request, res: Response) => {
