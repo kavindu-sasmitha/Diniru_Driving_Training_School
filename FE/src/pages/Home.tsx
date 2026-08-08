@@ -348,7 +348,7 @@ const Home = () => {
               href="tel:0771234567"
               className="border border-white/50 hover:bg-white/10 font-semibold px-12 py-5 rounded-3xl text-lg transition-all"
             >
-              CALL 077 123 4567
+              CALL 0472288800
             </a>
           </div>
         </div>
